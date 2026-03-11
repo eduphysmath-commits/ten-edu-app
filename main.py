@@ -91,20 +91,22 @@ def main():
             tab1, tab2 = st.tabs(["📂 Дайын суретті жүктеу (Ұсынылады)", "📸 Камерамен түсіру"])
             
             with tab1:
-                uploaded_file = st.file_uploader("Телефоннан немесе компьютерден анық суретті таңдаңыз", type=["jpg", "jpeg", "png"], key=f"upload_{st.session_state.cam_key}")
-                if uploaded_file:
-                    if st.button("➕ Осы файлды жұмысқа тіркеу", use_container_width=True, key="btn_upload"):
-                        st.session_state.photos.append(uploaded_file.getvalue())
+                # МҰНДА БІРДЕН БІРНЕШЕ СУРЕТ ТАҢДАУҒА РҰҚСАТ БЕРІЛДІ (accept_multiple_files=True)
+                uploaded_files = st.file_uploader("Телефоннан немесе компьютерден анық сурет(тер)ті таңдаңыз", type=["jpg", "jpeg", "png"], accept_multiple_files=True, key=f"upload_{st.session_state.cam_key}")
+                if uploaded_files:
+                    if st.button("➕ Осы файлдарды жұмысқа тіркеу", use_container_width=True, key="btn_upload"):
+                        for file in uploaded_files:
+                            st.session_state.photos.append(file.getvalue())
                         st.session_state.cam_key += 1
                         st.rerun()
 
             with tab2:
                 cam_image = st.camera_input("Дәптер бетін түсіріңіз", key=f"camera_{st.session_state.cam_key}")
+                # МҰНДА СУРЕТКЕ ТҮСІРГЕН БОЙДА АВТОМАТТЫ ТҮРДЕ САҚТАП, КАМЕРАНЫ БОСАТАДЫ
                 if cam_image:
-                    if st.button("➕ Камерадағы суретті тіркеу", use_container_width=True, key="btn_cam"):
-                        st.session_state.photos.append(cam_image.getvalue())
-                        st.session_state.cam_key += 1 
-                        st.rerun() 
+                    st.session_state.photos.append(cam_image.getvalue())
+                    st.session_state.cam_key += 1 
+                    st.rerun() 
 
             if st.session_state.photos:
                 st.write("---")
