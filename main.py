@@ -36,7 +36,6 @@ def main():
         st.session_state.cam_key = 0 
 
     # --- СІЛТЕМЕДЕН ПӘНДІ АНЫҚТАУ ---
-    # Егер сілтемеде ?exam=3 болса қазақ тілі, әйтпесе mặc định Алгебра (4)
     query_params = st.query_params
     exam_param = query_params.get("exam", "4")
     
@@ -45,6 +44,11 @@ def main():
         subject_name = "ҚАЗАҚ ТІЛІ ЖӘНЕ ӘДЕБИЕТІ"
         current_max_score = 30
         icon = "🇰🇿"
+    elif exam_param == "6":
+        current_exam_id = 6
+        subject_name = "ФИЗИКА (ТЖБ)"
+        current_max_score = 30
+        icon = "⚡"
     else:
         current_exam_id = 4
         subject_name = "АЛГЕБРА: 9-СЫНЫП"
@@ -79,7 +83,7 @@ def main():
         with col1:
             name = st.text_input("👤 Оқушының аты-жөні:", placeholder="Мысалы: Асқаров Нұрлан")
         with col2:
-            s_class = st.selectbox("🏫 Сыныбыңыз:", ["9-A", "9-B", "9-C", "9-D", "9-E", "9-F", "9-G"])
+            s_class = st.selectbox("🏫 Сыныбыңыз:", ["8-A", "8-B", "8-C", "8-D", "8-F", "8-G", "8-H", "8-K", "8-L", "8-M CL", "8-N CL", "9-A", "9-B", "9-C", "9-D", "9-F", "9-G", "9-H", "9-K", "9-M CL", "9-N CL"])
 
         if name:
             st.markdown("<div class='camera-box'><b>📸 Жұмысты суретке түсіру немесе жүктеу:</b></div>", unsafe_allow_html=True)
@@ -183,7 +187,7 @@ def main():
                     with st.container():
                         st.markdown(f"#### 👤 {data['student_name']} ({data['student_class']})")
                         if data['status'] == 'pending':
-                            st.warning("⏳ Мұғалім (AI) әлі тексеріп жатыр. Сәл күте উভয়ңыз...")
+                            st.warning("⏳ Мұғалім (AI) әлі тексеріп жатыр. Сәл күте тұрыңыз...")
                         else:
                             col_score, col_fb = st.columns([1, 3])
                             with col_score:
