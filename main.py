@@ -15,7 +15,7 @@ KEY = os.getenv("SUPABASE_KEY")
 TABLE_NAME = "submissions"
 
 # Беттің баптаулары міндетті түрде ең жоғарыда тұруы керек
-st.set_page_config(page_title="9-СЫНЫП: АЛГЕБРА", layout="wide", page_icon="📐")
+st.set_page_config(page_title="Ten-Edu: Тексеру жүйесі", layout="wide", page_icon="🎓")
 
 def send_data(payload):
     """Supabase-ке дерек жіберу функциясы"""
@@ -35,6 +35,22 @@ def main():
     if 'cam_key' not in st.session_state:
         st.session_state.cam_key = 0 
 
+    # --- СІЛТЕМЕДЕН ПӘНДІ АНЫҚТАУ ---
+    # Егер сілтемеде ?exam=3 болса қазақ тілі, әйтпесе mặc định Алгебра (4)
+    query_params = st.query_params
+    exam_param = query_params.get("exam", "4")
+    
+    if exam_param == "3":
+        current_exam_id = 3
+        subject_name = "ҚАЗАҚ ТІЛІ ЖӘНЕ ӘДЕБИЕТІ"
+        current_max_score = 30
+        icon = "🇰🇿"
+    else:
+        current_exam_id = 4
+        subject_name = "АЛГЕБРА: 9-СЫНЫП"
+        current_max_score = 20
+        icon = "📐"
+
     # 2. СТИЛЬ (Дизайн)
     st.markdown("""
         <style>
@@ -46,7 +62,7 @@ def main():
     """, unsafe_allow_html=True)
 
     # 3. НЕГІЗГІ БЕТ
-    st.markdown("<h1 class='main-title'>📐 АЛГЕБРА: 9-СЫНЫП (3-ТОҚСАН ТЖБ)</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 class='main-title'>{icon} {subject_name} (ТЖБ)</h1>", unsafe_allow_html=True)
 
     if st.session_state.submitted:
         st.balloons()
@@ -119,7 +135,7 @@ def main():
                             stitched_image.paste(img, (0, y_offset))
                             y_offset += img.height
 
-                        file_name = f"algebra_student_{int(time.time())}.jpg"
+                        file_name = f"exam_{current_exam_id}_student_{int(time.time())}.jpg"
                         stitched_image.thumbnail((1500, 1500 * len(images))) 
                         
                         img_byte_arr = io.BytesIO()
@@ -137,7 +153,7 @@ def main():
                         if upload_res.status_code in [200, 201]:
                             public_image_url = f"{URL}/storage/v1/object/public/exam_images/{file_name}"
                             payload = {
-                                "exam_id": 4,  
+                                "exam_id": current_exam_id,
                                 "student_name": name, 
                                 "student_class": s_class,
                                 "answers": {"lang": "kz", "image_url": public_image_url},
@@ -158,7 +174,7 @@ def main():
 
     if search_query:
         s_headers = {"apikey": KEY, "Authorization": f"Bearer {KEY}"}
-        res = requests.get(f"{URL}/rest/v1/{TABLE_NAME}?student_name=ilike.*{search_query}*&exam_id=eq.4&select=*&order=id.desc", headers=s_headers)
+        res = requests.get(f"{URL}/rest/v1/{TABLE_NAME}?student_name=ilike.*{search_query}*&exam_id=eq.{current_exam_id}&select=*&order=id.desc", headers=s_headers)
         
         if res.status_code == 200:
             results = res.json()
@@ -167,14 +183,14 @@ def main():
                     with st.container():
                         st.markdown(f"#### 👤 {data['student_name']} ({data['student_class']})")
                         if data['status'] == 'pending':
-                            st.warning("⏳ Мұғалім (AI) әлі тексеріп жатыр. Сәл күте тұрыңыз...")
+                            st.warning("⏳ Мұғалім (AI) әлі тексеріп жатыр. Сәл күте উভয়ңыз...")
                         else:
                             col_score, col_fb = st.columns([1, 3])
                             with col_score:
                                 raw_score = data.get('score', 0)
-                                percentage = int((raw_score / 20) * 100)
-                                st.metric("Нәтиже", f"{percentage}%", delta=f"{raw_score}/20 балл")
-                                st.progress(min(raw_score / 20, 1.0))
+                                percentage = int((raw_score / current_max_score) * 100)
+                                st.metric("Нәтиже", f"{percentage}%", delta=f"{raw_score}/{current_max_score} балл")
+                                st.progress(min(raw_score / current_max_score, 1.0))
                             with col_fb:
                                 with st.expander("📝 Мұғалімнің талдауы (AI)", expanded=True):
                                     st.write(data.get('ai_feedback', 'Талдау жасалуда...'))
