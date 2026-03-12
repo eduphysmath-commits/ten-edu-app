@@ -47,7 +47,7 @@ def main():
     elif exam_param == "6":
         current_exam_id = 6
         subject_name = "ФИЗИКА (ТЖБ)"
-        current_max_score = 30
+        current_max_score = 25
         icon = "⚡"
     else:
         current_exam_id = 4
